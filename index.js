@@ -4,9 +4,11 @@ const fs = require('fs');
 const fetch = require('node-fetch');
 const allExtentionsUrl = "https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery"
 const pageSize = 300;
+const initialPage = 1;
 
 const fetchExtentionsPage = (pageNumber) => {
-    const data = {assetTypes:[null],filters:[{criteria:[{filterType:8,value:"Microsoft.VisualStudio.Code"}],pageSize,pageNumber}], flags: 870};
+    console.log("fetching page number", pageNumber)
+    const data = {assetTypes:[null],filters:[{criteria:[{filterType:8,value:"Microsoft.VisualStudio.Code"},{"filterType":12,"value":"5122"}],direction:2,sortBy:4,pageSize,pageNumber}], flags: 870};
     fetch(allExtentionsUrl, {
         method: "POST",
         body: JSON.stringify(data),
@@ -19,6 +21,7 @@ const fetchExtentionsPage = (pageNumber) => {
         return response.json();
     }).then(data => {
         console.log(data);
+        console.log("downloading", data.results[0].extensions.length, " extentions")
         for (let extension of data.results[0].extensions) {
 
             const publisherName = extension.publisher.publisherName;
@@ -35,8 +38,7 @@ const fetchExtentionsPage = (pageNumber) => {
         }
 
         if (data.results[0].extensions.length == pageSize) {
-            console.log("fetching page number", pageNumber + 1)
-            fetchExtentionsPage(pageNumber++);
+            setTimeout(() => fetchExtentionsPage(pageNumber + 1), 5000);
         }
     })
 };
@@ -44,16 +46,16 @@ const fetchExtentionsPage = (pageNumber) => {
 const downloadExt = (url, filename, cb) => {
     
     download(url).then(data => {
-        fs.writeFile(`extensions/${filename}`, data, (err) => {
+        fs.writeFile(`mostPopularExtentions/${filename}`, data, (err) => {
              if(err) 
-                console.log(err);
+                console.log("err in", filename, " :", err);
             else
                 console.log(filename, "downloaded");
-    });
+        });
 
-    cb();
+        cb();
 
-    });
+    }).catch(err => console.log(err));
 }
 
-fetchExtentionsPage(1);
+fetchExtentionsPage(initialPage);
