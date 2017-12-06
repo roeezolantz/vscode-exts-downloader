@@ -54,7 +54,7 @@ const fetchExtentionsPage = (pageNumber, downloadsDir) => {
         
             try {
                 downloadExt(downloadUrl, fileName, downloadsDir, () => {
-                    console.log("downloaded", extName,"(", lastVersion, ") by", publisherName);
+                    //console.log("downloaded", extName,"(", lastVersion, ") by", publisherName);
                 });
             } catch(err) {
                 console.warn(fileName, err);
